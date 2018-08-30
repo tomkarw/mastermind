@@ -1,41 +1,52 @@
+#!/usr/bin/python3
+
 import os
-import pickle
 import time
+
+import pickle
+import json
+
 from mastermind import Mastermind
 
 class Game(object):
     """ Class where all the logic happens """
     
-    def __init__(self,save_file="save.mastermind-bin",stats_file="stats.mastermind-txt"):
+    def __init__(self,save_file="save.mastermind-bin",stats_file="stats.mastermind-json"):
         """ Initailize attributes, check avaliable files """
         
-        self.init_save_file(save_file) # current issue, saving mechanism
-        self.init_stats_file()
+        self.init_save_file(save_file)
+        self.init_stats_file(stats_file)
         self.current_game = None
+    
     
     def init_save_file(self,save_file):
         """ See if save file is avalible to load from
             Set it to True if there is, else Fasle """
+        
         try:
             fH = open(save_file,'rb')
             fH.close()
             self.load_file = True
-        except:
+        except IOError:
             self.load_file = False
         finally:
             self.save_file = save_file
     
-    def init_stats_file(self):
-        """ See if save file is avalible to load from
-            Set it to file name if there is, else set to None """
-        try:
-            fH = open(stats_file,'r')
-            fH.close()
-            self.stats_file = stats_file
-        except:
-            self.stats_file = None
+    
+    def init_stats_file(self,stats_file):
+        """ See if statistics file is avalible to load from
+            If not, create zeroed stats """
             
-    def start(self):
+        try:
+            with open(stats_file,'r') as fh:
+                self.stats = json.loads(fh.read())
+        except IOError:
+            self.stats = {"gamesWon" : 0, "gamesLost" : 0, "numGuesses" : 0, "timeInGame" : 0}
+        finally:
+            self.stats_file = stats_file
+            
+            
+    def main_menu(self):
         """ Main program loop, main menu and game options """
         
         print("Welcome to MASTERMIND")
@@ -128,7 +139,7 @@ class Game(object):
             with open(self.save_file,'rb') as fh:
                 self.current_game = pickle.load(fh)
             self.continue_game()
-        except:
+        except IOError:
             os.system('clear')
             print('Error occured while loading the file!')
             time.sleep(1)
@@ -140,21 +151,22 @@ class Game(object):
             self.load_file = True
             os.system('clear')
             print('Successfully saved the game to file!')
-        except:
+        except IOError:
             os.system('clear')
             print('Error occured while saving the file!')
         finally:
             time.sleep(1)
             
-        
     def game(self):
-        """ Start new Mastermind game """
+        """ Mastermind game loop """
         
         m = self.current_game
         
         while True:
+            t = time.time()
             os.system('clear')
             m.print_board()
+            print(m.pattern) # debugg
             
             pattern = self.game_input()
             if pattern == 'q':
@@ -163,26 +175,36 @@ class Game(object):
             comparison = m.compare_pattern(pattern)
             m.history.append((pattern,comparison))
             
+            m.time += time.time() - t
             m.turn += 1
+            
             if comparison[0] == m.numPegs or m.turn == m.numTries:
                 os.system('clear')
                 m.print_board()
                 if comparison[0] == m.numPegs:
                     print("Congratulations, you have won!")
+                    self.add_statistics(m,True)
                 else:
                     print("Game over.")
+                    self.add_statistics(m,False)
+                self.save_statistics()
                 self.current_game = None
                 input()
                 return
                 
+                
     def game_input(self):
-        """ In-game input """ 
+        """ In-game input """
+         
         m = self.current_game
         
         pattern = input("Make a guess. "+str(m.avail_pegs)+'\n'+"'q' for main menu\n")
+        
         if pattern in ('q','Q','quit'):
             return 'q'
+            
         pattern = m.clean_pattern(pattern)
+        
         while not m.validate_pattern(pattern):
             os.system('clear')
             m.print_board()
@@ -192,7 +214,51 @@ class Game(object):
             pattern = m.clean_pattern(pattern)
                 
         return pattern
+    
+    
+    def add_statistics(self,m,isWon):
+        """ Update statistics with current game """
         
+        s = self.stats
+        
+        if isWon:
+            s["gamesWon"] += 1
+            s["numGuesses"] += m.turn
+        else:
+            s["gamesLost"] += 1
+            
+        s["timeInGame"] += m.time
+    
+    def save_statistics(self):
+        try:
+            with open(self.stats_file,'w') as fh:
+                fh.write(json.dumps(self.stats))
+        except IOError:
+            print("Failed to update statistics data!")
+            
+            
+    def statistics(self):
+        """ Print out statistics """
+        
+        s = self.stats
+        
+        os.system('clear')
+        print("STATISTICS")
+        print(f"Games Won : {s['gamesWon']}")
+        print(f"Games Lost : {s['gamesLost']}")
+        try:
+            print(f"Winning percentage : {s['gamesWon']/s['gamesLost']}")
+        except ZeroDivisionError:
+            pass
+        try:
+            print(f"Average number of guesses when won : {s['numGuesses']/s['gamesWon']}")
+        except ZeroDivisionError:
+            pass
+
+        
+        print(f"Time spent in game : {s['timeInGame']} seconds")
+        input()
+
 
 g = Game()
-g.start()
+g.main_menu()
