@@ -166,7 +166,7 @@ class Game(object):
             t = time.time()
             os.system('clear')
             m.print_board()
-            print(m.pattern) # debugg
+            #print(m.pattern) # debugg
             
             pattern = self.game_input()
             if pattern == 'q':
