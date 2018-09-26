@@ -6,16 +6,25 @@ import time
 import pickle
 import json
 
+import collections
+
 from mastermind import Mastermind
+
+
+Config = collections.namedtuple('Config',['numPegs','numTries','availPegs'])
 
 class Game(object):
     """ Class where all the logic happens """
     
-    def __init__(self,save_file="save.mastermind-bin",stats_file="stats.mastermind-json"):
+    def __init__(self,save_file=".save.mastermind-bin",stats_file=".stats.mastermind-json",config_file=".mastermind.config"):
         """ Initailize attributes, check avaliable files """
         
         self.init_save_file(save_file)
         self.init_stats_file(stats_file)
+        
+        self.Config = Config
+        self.init_config_file(config_file)
+        
         self.current_game = None
     
     
@@ -44,7 +53,15 @@ class Game(object):
             self.stats = {"gamesWon" : 0, "gamesLost" : 0, "numGuesses" : 0, "timeInGame" : 0}
         finally:
             self.stats_file = stats_file
-            
+
+    def init_config_file(self,config_file):
+        try:
+            with open(config_file,'rb') as fh:
+                self.config = pickle.load(fh)
+        except IOError:
+            self.config = self.Config(4,12,('C','Z','P','N','Ż','V','S'))
+        finally:
+            self.config_file = config_file
             
     def main_menu(self):
         """ Main program loop, main menu and game options """
@@ -70,6 +87,8 @@ class Game(object):
                 self.load_game()
             elif d == 'see stats':
                 self.statistics()
+            elif d == 'change config':
+                self.change_configurations()
             elif d == 'quit':
                 os.system('clear')
                 print("Goodbye!")
@@ -99,6 +118,9 @@ class Game(object):
             print(f'{i}. See your statistics')
             d[i] = 'see stats'
             i += 1
+        print(f'{i}. Change game configuration')
+        d[i] = 'change config'
+        i += 1
         print(f'{i}. Quit')
         d[i] = 'quit'
         
@@ -127,7 +149,8 @@ class Game(object):
         
     def new_game(self):
         """ Create new board and start game """
-        self.current_game = Mastermind()
+        print(*self.config)
+        self.current_game = Mastermind(*self.config)
         self.game()
     
     def continue_game(self):
@@ -163,20 +186,19 @@ class Game(object):
         m = self.current_game
         
         while True:
-            t = time.time()
+            begin_time = time.time()
             os.system('clear')
             m.print_board()
-            print(m.pattern) # debugg
             
             pattern = self.game_input()
             if pattern == 'q':
                 return
             
             comparison = m.compare_pattern(pattern)
-            m.history.append((pattern,comparison))
+            m.appendToHistory((pattern,comparison))
             
-            m.time += time.time() - t
-            m.turn += 1
+            m.addTime(time.time() - begin_time)
+            m.nextTurn()
             
             if comparison[0] == m.numPegs or m.turn == m.numTries:
                 os.system('clear')
@@ -198,7 +220,7 @@ class Game(object):
          
         m = self.current_game
         
-        pattern = input("Make a guess. "+str(m.avail_pegs)+'\n'+"'q' for main menu\n")
+        pattern = input("Make a guess. "+str(m.availPegs)+'\n'+"'q' for main menu\n")
         
         if pattern in ('q','Q','quit'):
             return 'q'
@@ -208,7 +230,7 @@ class Game(object):
         while not m.validate_pattern(pattern):
             os.system('clear')
             m.print_board()
-            pattern = input('Inproper input, try again. '+str(m.avail_pegs)+'\n'+"'q' for main menu\n")
+            pattern = input('Inproper input, try again. '+str(m.availPegs)+'\n'+"'q' for main menu\n")
             if pattern in ('q','quit'):
                 return 'q'
             pattern = m.clean_pattern(pattern)
@@ -260,5 +282,26 @@ class Game(object):
         input()
 
 
+    def change_configurations(self):
+        #('Config',['numPegs','numTries','availPegs'])
+        os.system('clear')
+        numPegs = int(input(f'Number of pegs (currently {self.config.numPegs}): '))
+        numTries = int(input(f'Number of tries per game (currently {self.config.numTries}): '))
+        availPegs = tuple(input(f'Available pegs (currently {self.config.availPegs}): '))
+        
+        
+        self.config = self.Config(numPegs,numTries,availPegs)
+        
+        try:
+            with open(self.config_file,'wb') as fh:
+                pickle.dump(self.config,fh)
+            os.system('clear')
+            print('Successfully changed the configurations')
+        except IOError:
+            os.system('clear')
+            print('Error while saving new configurations!')
+        finally:
+            time.sleep(1)
+            
 g = Game()
 g.main_menu()
