@@ -1,0 +1,4 @@
+.mastermind.config
+__pycache__
+.save.mastermind-bin
+.stats.mastermind-json
