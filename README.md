@@ -7,7 +7,8 @@ To run simply type:
 ```
 This game has no dependencies, so no requirements.txt file is needed!
 
-The whole game is runs in terminal, there is a main menu where you choose your action. 
+The whole game runs in terminal, there is a main menu where you choose your action. 
 You can play a new game, load existing one or see statistics.
+If you didn't finish the games, no worries, you can quit and save it for later.
 
 Enjoy!
