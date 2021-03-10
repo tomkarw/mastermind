@@ -5,40 +5,40 @@ import re
 class Mastermind(object):
     """ Class to represent the board """
 
-    def __init__(self, numPegs, numTries, availPegs, pattern=None):
+    def __init__(self, num_pegs, num_tries, avail_pegs, pattern=None):
         """ Initialize all necessary attribute 
-            numPegs - width of the board, how many pegs in a pattern
-            numTries - maximum number of attempts to solve the pattern
-            avail_pegs - range of avalible pegs colors
+            num_pegs - width of the board, how many pegs in a pattern
+            num_tries - maximum number of attempts to solve the pattern
+            avail_pegs - range of available pegs colors
             pattern - used for setting a fixed pattern (debugging tool)
         """
 
-        self._availPegs = availPegs
-        self._numPegs = numPegs
-        self._numTries = numTries
+        self._avail_pegs = avail_pegs
+        self._num_pegs = num_pegs
+        self._num_tries = num_tries
         self._listHistory = []
         self._turn = 0
         self._time = 0
 
         if not pattern:
-            self._pattern = tuple(random.sample(self.availPegs, self.numPegs))
+            self._pattern = tuple(random.sample(self.avail_pegs, self.num_pegs))
         else:
             self._pattern = pattern
 
     @property
-    def availPegs(self):
-        return self._availPegs
+    def avail_pegs(self):
+        return self._avail_pegs
 
     @property
-    def numPegs(self):
-        return self._numPegs
+    def num_pegs(self):
+        return self._num_pegs
 
     @property
-    def numTries(self):
-        return self._numTries
+    def num_tries(self):
+        return self._num_tries
 
     @property
-    def listHistory(self):
+    def list_history(self):
         return self._listHistory
 
     @property
@@ -53,13 +53,13 @@ class Mastermind(object):
     def pattern(self):
         return self._pattern
 
-    def appendToHistory(self, record):
+    def append_to_history(self, record):
         self._listHistory.append(record)
 
-    def nextTurn(self):
+    def next_turn(self):
         self._turn += 1
 
-    def addTime(self, time):
+    def add_time(self, time):
         self._time += time
 
     def compare_pattern(self, pattern):
@@ -67,35 +67,35 @@ class Mastermind(object):
             pattern - valid pattern
             Return tuple (rightly positioned pegs, rightly colored pegs)"""
 
-        rightPos, rightCol = 0, 0
+        right_pos, right_col = 0, 0
         # self.history[0].append(pattern)
         for index, p in enumerate(pattern):
             if p == self.pattern[index]:
-                rightPos += 1
+                right_pos += 1
         for p in set(pattern):
             if p in set(self.pattern):
-                rightCol += 1
-        rightCol -= rightPos
-        return rightPos, rightCol
+                right_col += 1
+        right_col -= right_pos
+        return right_pos, right_col
 
     def clean_pattern(self, pattern):
         """ Clean pattern from non-peg characters
             pattern - any string
             Return string of only valid characters """
 
-        regex = r'[^' + ''.join(self.availPegs) + ']'
+        regex = r'[^' + ''.join(self.avail_pegs) + ']'
         pattern = re.sub(regex, '', pattern.upper())
         return pattern
 
     def validate_pattern(self, pattern):
         """ Check if input pattern is valid 
-            pattern - string cleard of unvalid characters
+            pattern - string cleared of invalid characters
             Return True if string is a viable pattern, else False """
 
-        if len(pattern) != self.numPegs:
+        if len(pattern) != self.num_pegs:
             return False
         for p in pattern:
-            if p not in self.availPegs:
+            if p not in self.avail_pegs:
                 return False
         return True
 
@@ -103,16 +103,16 @@ class Mastermind(object):
         """ Print current board """
         print_string = ''
 
-        for i in range(self.numTries - self.turn):
+        for i in range(self.num_tries - self.turn):
             print_string += '| '
-            print_string += '_ ' * self.numPegs
+            print_string += '_ ' * self.num_pegs
             print_string += '|\n'
 
         for i in range(self.turn):
             print_string += '| '
-            for p in self.listHistory[i][0]:
+            for p in self.list_history[i][0]:
                 print_string += str(p) + ' '
             print_string += '|'
-            print_string += f" pos={self.listHistory[i][1][0]} col={self.listHistory[i][1][1]}\n"
+            print_string += f" pos={self.list_history[i][1][0]} col={self.list_history[i][1][1]}\n"
 
         print(print_string, end='')

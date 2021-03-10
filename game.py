@@ -10,7 +10,7 @@ import collections
 
 from mastermind import Mastermind
 
-Config = collections.namedtuple('Config', ['numPegs', 'numTries', 'availPegs'])
+Config = collections.namedtuple('Config', ['num_pegs', 'num_tries', 'avail_pegs'])
 
 
 class Game(object):
@@ -19,49 +19,48 @@ class Game(object):
     def __init__(self, save_file=".save.bin", stats_file=".stats.json", config_file=".config"):
         """ Initialize attributes, check available files """
 
-        self.init_save_file(save_file)
-        self.init_stats_file(stats_file)
-
-        self.Config = Config
-        self.init_config_file(config_file)
-
+        self.load_file, self.save_file = self.init_save_file(save_file)
+        self.stats, self.stats_file = self.init_stats_file(stats_file)
+        self.config, self.config_file = self.init_config_file(config_file)
         self.current_game = None
 
-    def init_save_file(self, save_file):
+    @staticmethod
+    def init_save_file(save_file):
         """
         See if save file is available to load from
         Set it to True if there is, else False
         """
 
         try:
-            fH = open(save_file, 'rb')
-            fH.close()
-            self.load_file = True
+            fh = open(save_file, 'rb')
+            fh.close()
         except IOError:
-            self.load_file = False
-        finally:
-            self.save_file = save_file
+            return False, None
 
-    def init_stats_file(self, stats_file):
+        return True, save_file
+
+    @staticmethod
+    def init_stats_file(stats_file):
         """ See if statistics file is available to load from
             If not, create zeroed stats """
 
         try:
             with open(stats_file, 'r') as fh:
-                self.stats = json.loads(fh.read())
+                stats = json.loads(fh.read())
         except IOError:
-            self.stats = {"gamesWon": 0, "gamesLost": 0, "numGuesses": 0, "timeInGame": 0}
-        finally:
-            self.stats_file = stats_file
+            stats = {"gamesWon": 0, "gamesLost": 0, "numGuesses": 0, "timeInGame": 0}
 
-    def init_config_file(self, config_file):
+        return stats, stats_file
+
+    @staticmethod
+    def init_config_file(config_file):
         try:
             with open(config_file, 'rb') as fh:
-                self.config = pickle.load(fh)
+                config = pickle.load(fh)
         except IOError:
-            self.config = self.Config(4, 12, ('C', 'Z', 'P', 'N', 'Ż', 'V', 'S'))
-        finally:
-            self.config_file = config_file
+            config = Config(4, 12, ('C', 'Z', 'P', 'N', 'Ż', 'V', 'S'))
+
+        return config, config_file
 
     def main_menu(self):
         """ Main program loop, main menu and game options """
@@ -130,13 +129,13 @@ class Game(object):
         """ Loop until proper input is given
             Return input for main menu options """
         i = 0
-        while (i < 1 or i > menu_options):
+        while i < 1 or i > menu_options:
             i = input()
             try:
                 i = int(i)
-                if i > 0 and i <= menu_options:
+                if 0 < i <= menu_options:
                     break
-            except:
+            except ValueError:
                 os.system('clear')
                 self.print_menu()
                 print(f"'{i}' is not an option, choose again.")
@@ -163,7 +162,7 @@ class Game(object):
             self.continue_game()
         except IOError:
             os.system('clear')
-            print('Error occured while loading the file!')
+            print('Error occurred while loading the file!')
             time.sleep(1)
 
     def save_game(self):
@@ -175,7 +174,7 @@ class Game(object):
             print('Successfully saved the game to file!')
         except IOError:
             os.system('clear')
-            print('Error occured while saving the file!')
+            print('Error occurred while saving the file!')
         finally:
             time.sleep(1)
 
@@ -194,15 +193,15 @@ class Game(object):
                 return
 
             comparison = m.compare_pattern(pattern)
-            m.appendToHistory((pattern, comparison))
+            m.append_to_history((pattern, comparison))
 
-            m.addTime(time.time() - begin_time)
-            m.nextTurn()
+            m.add_time(time.time() - begin_time)
+            m.next_turn()
 
-            if comparison[0] == m.numPegs or m.turn == m.numTries:
+            if comparison[0] == m.num_pegs or m.turn == m.num_tries:
                 os.system('clear')
                 m.print_board()
-                if comparison[0] == m.numPegs:
+                if comparison[0] == m.num_pegs:
                     print("Congratulations, you have won!")
                     self.add_statistics(m, True)
                 else:
@@ -218,7 +217,7 @@ class Game(object):
 
         m = self.current_game
 
-        pattern = input("Make a guess. " + str(m.availPegs) + '\n' + "'q' for main menu\n")
+        pattern = input("Make a guess. " + str(m.avail_pegs) + '\n' + "'q' for main menu\n")
 
         if pattern in ('q', 'Q', 'quit'):
             return 'q'
@@ -228,19 +227,19 @@ class Game(object):
         while not m.validate_pattern(pattern):
             os.system('clear')
             m.print_board()
-            pattern = input('Inproper input, try again. ' + str(m.availPegs) + '\n' + "'q' for main menu\n")
+            pattern = input('Improper input, try again. ' + str(m.avail_pegs) + '\n' + "'q' for main menu\n")
             if pattern in ('q', 'quit'):
                 return 'q'
             pattern = m.clean_pattern(pattern)
 
         return pattern
 
-    def add_statistics(self, m, isWon):
+    def add_statistics(self, m, is_won):
         """ Update statistics with current game """
 
         s = self.stats
 
-        if isWon:
+        if is_won:
             s["gamesWon"] += 1
             s["numGuesses"] += m.turn
         else:
@@ -277,13 +276,13 @@ class Game(object):
         input()
 
     def change_configurations(self):
-        # ('Config',['numPegs','numTries','availPegs'])
+        # ('Config',['num_pegs','num_tries','avail_pegs'])
         os.system('clear')
-        numPegs = int(input(f'Number of pegs (currently {self.config.numPegs}): '))
-        numTries = int(input(f'Number of tries per game (currently {self.config.numTries}): '))
-        availPegs = tuple(input(f'Available pegs (currently {self.config.availPegs}): '))
+        num_pegs = int(input(f'Number of pegs (currently {self.config.num_pegs}): '))
+        num_tries = int(input(f'Number of tries per game (currently {self.config.num_tries}): '))
+        avail_pegs = tuple(input(f'Available pegs (currently {self.config.avail_pegs}): '))
 
-        self.config = self.Config(numPegs, numTries, availPegs)
+        self.config = Config(num_pegs, num_tries, avail_pegs)
 
         try:
             with open(self.config_file, 'wb') as fh:
