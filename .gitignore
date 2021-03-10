@@ -1,0 +1,7 @@
+__pycache__
+.idea/
+.config
+.save.bin
+.save.json
+.stats.json
+output.log

@@ -1,0 +1,112 @@
+1
+ABCD
+master: Welcome to MASTERMIND
+master: 1. Play new game
+master: 2. Load game from file
+master: 3. See your statistics
+master: 4. Change game configuration
+master: 5. Quit
+master: [3J[H[2J| _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: Make a guess. ('A', 'B', 'C', 'D', 'E', 'F', 'G')
+master: 'q' for main menu
+master: [3J[H[2J| _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | A B C D | pos=0 col=1
+solver: len =  72
+DEFG
+master: Make a guess. ('A', 'B', 'C', 'D', 'E', 'F', 'G')
+master: 'q' for main menu
+master: [3J[H[2J| _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | A B C D | pos=0 col=1
+master: | D E F G | pos=1 col=2
+solver 1 2
+solver: len =  20
+BEGF
+master: Make a guess. ('A', 'B', 'C', 'D', 'E', 'F', 'G')
+master: 'q' for main menu
+master: [3J[H[2J| _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | A B C D | pos=0 col=1
+master: | D E F G | pos=1 col=2
+solver 1 2
+master: | B E G F | pos=0 col=3
+solver 0 3
+solver: len =  9
+CFEG
+master: Make a guess. ('A', 'B', 'C', 'D', 'E', 'F', 'G')
+master: 'q' for main menu
+master: [3J[H[2J| _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | A B C D | pos=0 col=1
+master: | D E F G | pos=1 col=2
+solver 1 2
+master: | B E G F | pos=0 col=3
+solver 0 3
+master: | C F E G | pos=0 col=4
+solver 0 4
+solver: len =  2
+EGFC
+master: Make a guess. ('A', 'B', 'C', 'D', 'E', 'F', 'G')
+master: 'q' for main menu
+master: [3J[H[2J| _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | _ _ _ _ |
+master: | A B C D | pos=0 col=1
+master: | D E F G | pos=1 col=2
+solver 1 2
+master: | B E G F | pos=0 col=3
+solver 0 3
+master: | C F E G | pos=0 col=4
+solver 0 4
+master: | E G F C | pos=4 col=0
+solver 4 0
+solver: len =  1
+q
+q
+5
